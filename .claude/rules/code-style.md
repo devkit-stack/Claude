@@ -20,11 +20,13 @@ globs:
 - Generic constraints over type assertions (`as`)
 
 ## Validation
-- **Elysia routes:** TypeBox (`t`) from `elysia` — the native validation system
+- **Zod everywhere** — single validation library across the entire stack
+- **Elysia routes:** Zod schemas via Standard Schema support (Elysia 1.2+)
 - **Frontend forms:** Zod schemas for form data and user input
 - **Environment vars:** Zod schemas (e.g. `z.string().url()`)
+- **PrismaBox:** Generate Zod schemas from Prisma models for consistent validation
 - Colocate schema with its usage
-- Infer types from schemas: `typeof schema.static` (TypeBox) or `z.infer<typeof schema>` (Zod)
+- Infer types from schemas: `z.infer<typeof schema>`
 
 ## Error Handling
 - Return-based errors — avoid `throw` in business logic

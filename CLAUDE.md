@@ -24,7 +24,7 @@ apps/
     src/
       controllers/   # Elysia route instances
       services/      # Business logic
-      models/        # Data access + TypeBox schemas
+      models/        # Data access + Zod schemas (PrismaBox)
       plugins/       # Shared Elysia plugins
     prisma/          # Schema & migrations
     generated/       # Prisma generated client
@@ -40,7 +40,7 @@ packages/       # Shared packages
 - **Naming:** camelCase (variables, functions), PascalCase (types, components), kebab-case (files, folders)
 - **Language:** TypeScript strict mode everywhere. English comments and commits only.
 - **Exports:** Named exports preferred. Default exports only for Next.js pages/layouts.
-- **Validation:** TypeBox (`t`) for Elysia routes, Zod for frontend forms and env vars.
+- **Validation:** Zod everywhere — Elysia routes (via Standard Schema), frontend forms, env vars. PrismaBox to generate Zod schemas from Prisma models.
 - **Error handling:** Return-based (no throw). Use Result pattern or `status()` from elysia.
 - **Imports:** Absolute paths via `@/` alias. Barrel exports in `index.ts` per module.
 
@@ -80,7 +80,7 @@ lefthook run pre-commit    # Run pre-commit hooks manually
 ### Backend (ElysiaJS)
 - **Controller** = Elysia route instance per domain (`controllers/user.ts`)
 - **Service** = Business logic class, returns errors via `status()`
-- **Model** = Prisma data-access + TypeBox schemas (`t`) + inferred types
+- **Model** = Prisma data-access + Zod schemas (`z`) + inferred types (PrismaBox)
 - **Eden Treaty** = Type-safe API client from Elysia app type
 - **Prisma 7** = Driver adapter required, generated client in `generated/prisma/`
 

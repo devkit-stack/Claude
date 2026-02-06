@@ -56,7 +56,7 @@ Structure your review as:
 ## Domain Checklists
 
 ### Backend Review
-- [ ] Input validation on all endpoints (TypeBox schemas)
+- [ ] Input validation on all endpoints (Zod schemas via Standard Schema)
 - [ ] No raw SQL — use Prisma queries
 - [ ] Error handling: no unhandled throws, proper HTTP status codes
 - [ ] Auth middleware on protected routes

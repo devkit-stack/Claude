@@ -45,14 +45,14 @@ When creating a new backend feature:
 3. **Model** — Create data-access functions in `apps/api/src/models/`
 4. **Service** — Implement business logic in `apps/api/src/services/`
 5. **Controller** — Wire routes in `apps/api/src/controllers/`
-6. **Validate** — Add TypeBox schemas (`t`) for all inputs
+6. **Validate** — Add Zod schemas (`z`) for all inputs (via Standard Schema)
 7. **Register** — Mount controller on the main app
 8. **Test** — Write integration tests using `app.handle()`
 
 ## Key Patterns
 
 - Export `type App = typeof app` for Eden Treaty
-- Use Prismabox to generate TypeBox validation models from Prisma schema
+- Use PrismaBox to generate Zod validation schemas from Prisma models
 - Cursor-based pagination for list endpoints
 - Result pattern for service return types: `{ success, data } | { success, error }`
 - Elysia error handlers for HTTP error responses
@@ -62,5 +62,5 @@ When creating a new backend feature:
 
 - Never import from `apps/web/` — backend is independent
 - Never expose internal errors to clients
-- Always validate external input with TypeBox (`t`)
+- Always validate external input with Zod (`z`) via Standard Schema
 - Use transactions for multi-step database operations

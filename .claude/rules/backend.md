@@ -17,7 +17,7 @@ src/
   services/          # Business logic classes
     user.ts
     auth.ts
-  models/            # Prisma data-access layer + TypeBox schemas
+  models/            # Prisma data-access layer + Zod schemas (PrismaBox)
     user.ts
     auth.ts
   plugins/           # Shared Elysia plugins
@@ -25,25 +25,25 @@ src/
 ```
 
 ### Controller (`controllers/user.ts`)
-An Elysia instance per domain. Handles HTTP concerns, validates with TypeBox, delegates to service.
+An Elysia instance per domain. Handles HTTP concerns, validates with Zod (via Standard Schema), delegates to service.
 
 ```typescript
 // src/controllers/user.ts
-import { Elysia, t } from "elysia"
+import { Elysia } from "elysia"
+import { z } from "zod"
 import { UserService } from "../services/user"
-import { UserModel } from "../models/user"
+import { createUserSchema, userResponseSchema } from "../models/user"
 
 export const userController = new Elysia({ prefix: "/users" })
   .decorate("userService", new UserService())
-  .model(UserModel)
   .get("/", ({ userService, query }) => userService.list(query), {
-    query: t.Object({
-      cursor: t.Optional(t.String()),
-      limit: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
+    query: z.object({
+      cursor: z.string().optional(),
+      limit: z.number().min(1).max(100).optional(),
     }),
   })
   .post("/", ({ userService, body }) => userService.create(body), {
-    body: "user.create",
+    body: createUserSchema,
   })
 ```
 
@@ -65,69 +65,53 @@ export class UserService {
 ```
 
 ### Model (`models/user.ts`)
-TypeBox schemas for validation + inferred types. Custom errors live here too.
+Zod schemas for validation + inferred types. Use PrismaBox to generate base schemas from Prisma models, then extend as needed.
 
 ```typescript
 // src/models/user.ts
-import { t } from "elysia"
+import { z } from "zod"
 
-export const UserModel = {
-  "user.create": t.Object({
-    name: t.String({ minLength: 1 }),
-    email: t.String({ format: "email" }),
-  }),
-  "user.response": t.Object({
-    id: t.String(),
-    name: t.String(),
-    email: t.String(),
-  }),
-}
+export const createUserSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+})
+
+export const userResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string().email(),
+})
 
 // Infer types from schemas
-export type CreateUser = typeof UserModel["user.create"]["static"]
+export type CreateUser = z.infer<typeof createUserSchema>
+export type UserResponse = z.infer<typeof userResponseSchema>
 ```
 
 ## Elysia Key Concepts
 
-### Validation: TypeBox (`t`) by Default
-Elysia uses TypeBox natively. Import `t` from `elysia` — not Zod.
+### Validation: Zod via Standard Schema
+Elysia supports Zod natively via Standard Schema (Elysia 1.2+). Use Zod for all validation — consistent across the entire stack.
 
 ```typescript
-import { Elysia, t } from "elysia"
+import { Elysia } from "elysia"
+import { z } from "zod"
 
-// TypeBox (default, recommended)
 .post("/user", ({ body }) => body, {
-  body: t.Object({
-    name: t.String(),
-    age: t.Number({ minimum: 0 }),
+  body: z.object({
+    name: z.string(),
+    age: z.number().min(0),
   }),
 })
 ```
 
-Zod is supported via Standard Schema but is not the default:
-```typescript
-import { z } from "zod"
-
-.post("/user", ({ body }) => body, {
-  body: z.object({ name: z.string(), age: z.number().min(0) }),
-})
-```
-
-### Reference Models
-Register schemas by name for reuse and OpenAPI docs:
-
-```typescript
-new Elysia()
-  .model(UserModel)
-  .prefix("model", "User")
-  .post("/", ({ body }) => body, { body: "User.create" })
-```
+Elysia also supports TypeBox natively (`t` from `elysia`), but we standardize on Zod for consistency across backend and frontend.
 
 ### Error Handling: `status()`
 Use `status()` from elysia (import or context destructure):
 
 ```typescript
-import { status } from "elysia"
+import { Elysia, status } from "elysia"
+import { z } from "zod"
 
 // In handler
 .get("/user/:id", ({ params: { id } }) => {
@@ -136,8 +120,8 @@ import { status } from "elysia"
   return user
 }, {
   response: {
-    200: t.Object({ id: t.String(), name: t.String() }),
-    404: t.String(),
+    200: z.object({ id: z.string(), name: z.string() }),
+    404: z.string(),
   },
 })
 ```
