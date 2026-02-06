@@ -1,0 +1,5 @@
+# Claude Code — local/private files
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/agent-memory-local/
+.claude/context/session.md
